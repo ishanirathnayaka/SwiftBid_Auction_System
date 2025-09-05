@@ -1,7 +1,7 @@
 .footer {
   background: linear-gradient(135deg, var(--neutral-900), var(--neutral-800));
   color: var(--neutral-100);
-  padding: var(--spacing-3xl) 0 var(--spacing-xl) 0;
+  padding: var(--fluid-spacing-3xl) 0 var(--fluid-spacing-xl) 0;
   position: relative;
   overflow: hidden;
 }
@@ -21,9 +21,9 @@
 }
 
 .footer-container {
-  max-width: 1200px;
+  max-width: var(--container-xl);
   margin: 0 auto;
-  padding: 0 var(--spacing-lg);
+  padding: 0 var(--fluid-spacing-lg);
   position: relative;
   z-index: 1;
 }
@@ -31,8 +31,8 @@
 .footer-content {
   display: grid;
   grid-template-columns: 2fr 1fr 1fr 1fr;
-  gap: var(--spacing-2xl);
-  margin-bottom: var(--spacing-2xl);
+  gap: var(--fluid-spacing-2xl);
+  margin-bottom: var(--fluid-spacing-2xl);
 }
 
 .footer-section {
@@ -45,10 +45,10 @@
 }
 
 .footer-title {
-  font-size: var(--font-size-xl);
+  font-size: var(--fluid-font-xl);
   font-weight: 700;
   color: white;
-  margin-bottom: var(--spacing-lg);
+  margin-bottom: var(--fluid-spacing-lg);
   background: linear-gradient(135deg, var(--primary-400), var(--secondary-400));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
@@ -56,10 +56,10 @@
 }
 
 .footer-description {
-  font-size: var(--font-size-base);
+  font-size: var(--fluid-font-base);
   line-height: var(--line-height-relaxed);
   color: var(--neutral-300);
-  margin-bottom: var(--spacing-xl);
+  margin-bottom: var(--fluid-spacing-xl);
 }
 
 .footer-social {
@@ -100,7 +100,7 @@
 .footer-links a {
   color: var(--neutral-300);
   text-decoration: none;
-  font-size: var(--font-size-base);
+  font-size: var(--fluid-font-base);
   transition: color var(--transition-normal);
   position: relative;
 }
@@ -127,30 +127,48 @@
 .contact-info {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-md);
+  gap: var(--fluid-spacing-md);
 }
 
 .contact-item {
   color: var(--neutral-300);
-  font-size: var(--font-size-base);
+  font-size: var(--fluid-font-base);
   line-height: var(--line-height-relaxed);
   margin: 0;
 }
 
 .footer-bottom {
-  padding-top: var(--spacing-xl);
+  padding-top: var(--fluid-spacing-xl);
   border-top: 1px solid var(--neutral-700);
   text-align: center;
 }
 
 .footer-copyright {
   color: var(--neutral-400);
-  font-size: var(--font-size-sm);
+  font-size: var(--fluid-font-sm);
   margin: 0;
 }
 
 /* Responsive design */
+@media (max-width: 1200px) {
+  .footer-container {
+    max-width: var(--container-lg);
+  }
+  
+  .footer-content {
+    gap: var(--spacing-xl);
+  }
+}
+
 @media (max-width: 1024px) {
+  .footer {
+    padding: var(--spacing-2xl) 0 var(--spacing-lg) 0;
+  }
+  
+  .footer-container {
+    padding: 0 var(--spacing-md);
+  }
+  
   .footer-content {
     grid-template-columns: 1fr 1fr;
     gap: var(--spacing-xl);
@@ -167,6 +185,10 @@
     padding: var(--spacing-2xl) 0 var(--spacing-lg) 0;
   }
   
+  .footer-container {
+    padding: 0 var(--spacing-md);
+  }
+  
   .footer-content {
     grid-template-columns: 1fr;
     gap: var(--spacing-lg);
@@ -174,10 +196,77 @@
   
   .footer-about {
     grid-column: span 1;
+    text-align: center;
   }
   
   .footer-social {
     justify-content: center;
+  }
+  
+  .footer-title {
+    font-size: var(--fluid-font-lg);
+  }
+  
+  .footer-description {
+    font-size: var(--fluid-font-sm);
+  }
+}
+
+@media (max-width: 640px) {
+  .footer-content {
+    gap: var(--spacing-md);
+  }
+  
+  .footer-social {
+    gap: var(--spacing-sm);
+  }
+  
+  .social-link {
+    width: 35px;
+    height: 35px;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer {
+    padding: var(--spacing-xl) 0 var(--spacing-md) 0;
+  }
+  
+  .footer-container {
+    padding: 0 var(--spacing-sm);
+  }
+  
+  .footer-title {
+    font-size: var(--fluid-font-base);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .footer-description {
+    font-size: var(--fluid-font-xs);
+    margin-bottom: var(--spacing-md);
+  }
+  
+  .footer-links a {
+    font-size: var(--fluid-font-sm);
+  }
+  
+  .contact-item {
+    font-size: var(--fluid-font-sm);
+  }
+}
+
+@media (max-width: 320px) {
+  .footer-container {
+    padding: 0 var(--spacing-xs);
+  }
+  
+  .footer-social {
+    gap: var(--spacing-xs);
+  }
+  
+  .social-link {
+    width: 30px;
+    height: 30px;
   }
 }
 
