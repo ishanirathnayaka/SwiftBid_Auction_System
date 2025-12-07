@@ -9,6 +9,7 @@ import StarIcon from '@mui/icons-material/Star';
 import SecurityIcon from '@mui/icons-material/Security';
 import LocalShippingIcon from '@mui/icons-material/LocalShipping';
 import VerifiedIcon from '@mui/icons-material/Verified';
+import API_CONFIG from "./config/api";
 
 const AuctionItem = () => {
   const { productId } = useParams();
@@ -17,39 +18,73 @@ const AuctionItem = () => {
   const [bidAmount, setBidAmount] = useState(1300);
   const [productData, setProductData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState(null);
 
-  // Get product data from navigation state or set default
+  // Fetch product data from API
   useEffect(() => {
-    setTimeout(() => {
-      if (location.state) {
-        setProductData(location.state);
-        // Set initial bid based on product type or use provided data
-        if (location.state.topBid) {
-          // For auction items, start with current top bid + 50
-          setBidAmount(parseInt(location.state.topBid) + 50);
+    const fetchProductData = async () => {
+      setIsLoading(true);
+      setError(null);
+      
+      try {
+        // First try to get product from route state
+        if (location.state) {
+          setProductData(location.state);
+          // Set initial bid based on product type or use provided data
+          if (location.state.topBid) {
+            // For auction items, start with current top bid + 50
+            setBidAmount(parseInt(location.state.topBid) + 50);
+          } else {
+            // For product categories from home page
+            const categoryBids = {
+              'SMART PHONES': 800,
+              'SMART WATCHES': 350,
+              'COMPUTERS': 1200,
+              'SMART TVS': 600,
+              'CAMERAS': 450,
+              'HEADPHONES': 200
+            };
+            setBidAmount(categoryBids[location.state.title] || 500);
+          }
         } else {
-          // For product categories from home page
-          const categoryBids = {
-            'SMART PHONES': 800,
-            'SMART WATCHES': 350,
-            'COMPUTERS': 1200,
-            'SMART TVS': 600,
-            'CAMERAS': 450,
-            'HEADPHONES': 200
-          };
-          setBidAmount(categoryBids[location.state.title] || 500);
+          // If no route state, fetch from API using productId
+          const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.PRODUCT_BY_ID(productId)}`);
+          if (!response.ok) {
+            throw new Error('Failed to fetch product data');
+          }
+          const data = await response.json();
+          setProductData(data);
+          // Set initial bid based on product data from API
+          if (data.topBid) {
+            setBidAmount(parseInt(data.topBid) + 50);
+          } else {
+            // Set default bid based on category
+            const categoryBids = {
+              'SMART PHONES': 800,
+              'SMART WATCHES': 350,
+              'COMPUTERS': 1200,
+              'SMART TVS': 600,
+              'CAMERAS': 450,
+              'HEADPHONES': 200
+            };
+            setBidAmount(categoryBids[data.category] || 500);
+          }
         }
-      } else {
-        // Fallback data if accessed directly
+      } catch (err) {
+        setError(err.message);
+        // Fallback data if API call fails
         setProductData({
           id: productId,
           title: 'Product Not Found',
           image: '/default-product.png',
           rating: 0
         });
+      } finally {
+        setIsLoading(false);
       }
-      setIsLoading(false);
-    }, 500);
+    };
+
+    fetchProductData();
   }, [location.state, productId]);
 
   const increaseBid = () => setBidAmount(bidAmount + 50);
@@ -70,10 +105,31 @@ const AuctionItem = () => {
     setBidAmount(bidAmount > minBid ? bidAmount - 50 : minBid);
   };
   
-  const placeBid = () => {
-    alert(`Your bid of $${bidAmount} has been placed on ${productData?.title || 'this item'}!`);
-    // Could navigate back to auctions or show success page
-    navigate('/auctions');
+  const placeBid = async () => {
+    try {
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.BIDS}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          auction_id: productId,  // Assuming productId corresponds to auction ID
+          user_id: 'user-123',    // In a real app, this would come from auth
+          amount: bidAmount
+        })
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to place bid');
+      }
+
+      const result = await response.json();
+      alert(`Your bid of $${bidAmount} has been placed on ${productData?.title || 'this item'}!`);
+      // Could navigate back to auctions or show success page
+      navigate('/auctions');
+    } catch (err) {
+      alert(`Failed to place bid: ${err.message}`);
+    }
   };
 
   // Show loading state

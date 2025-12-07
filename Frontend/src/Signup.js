@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, Link } from 'react-router-dom';
+import API_CONFIG from "./config/api";
 import "./styles/Signup.css";
 
 export default function SignUpPage() {
@@ -61,12 +62,22 @@ export default function SignUpPage() {
     setIsSubmitting(true);
     
     try {
-      // Here you would typically send data to your backend
-      console.log('Sign up data:', formData);
+      // Send data to backend API
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_REGISTER}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+      });
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await response.json();
       
+      if (!response.ok) {
+        throw new Error(result.error || `HTTP error! status: ${response.status}`);
+      }
+      
+      console.log('Registration successful:', result);
       setSubmitted(true);
       
       // Show success message and redirect after delay
@@ -76,7 +87,17 @@ export default function SignUpPage() {
       
     } catch (error) {
       console.error('Error during signup:', error);
-      setError('Registration failed. Please try again.');
+      
+      // Provide more specific error messages
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        setError('Unable to connect to server. Please check if the backend is running.');
+      } else if (error.message && (error.message.includes('409') || error.message.includes('already exists'))) {
+        setError('An account with this email already exists. Please try logging in instead.');
+      } else if (error.message) {
+        setError(error.message);
+      } else {
+        setError('Registration failed. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }

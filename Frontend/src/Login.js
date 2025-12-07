@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import API_CONFIG from "./config/api";
 import "./styles/Login.css";
 
 const LoginPage = () => {
@@ -36,16 +37,33 @@ const LoginPage = () => {
     }
 
     try {
-      // Here you would typically send data to your backend
-      console.log('Login attempt:', { 
-        email: formData.email, 
-        rememberMe: formData.rememberMe 
+      // Send data to backend API
+      const response = await fetch(`${API_CONFIG.BASE_URL}${API_CONFIG.ENDPOINTS.USER_LOGIN}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          email: formData.email,
+          password: formData.password
+        })
       });
       
-      // Simulate API call delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const result = await response.json();
       
-      // For demo purposes, accept any email/password combination
+      if (!response.ok) {
+        throw new Error(result.error || `HTTP error! status: ${response.status}`);
+      }
+      
+      console.log('Backend login successful:', result);
+      
+      // Store user data
+      if (formData.rememberMe) {
+        localStorage.setItem('user', JSON.stringify(result.user));
+      } else {
+        sessionStorage.setItem('user', JSON.stringify(result.user));
+      }
+      
       setSubmitted(true);
       
       // Show success message and redirect after delay
@@ -55,7 +73,17 @@ const LoginPage = () => {
       
     } catch (error) {
       console.error('Error during login:', error);
-      setError('Login failed. Please try again.');
+      
+      // Provide more specific error messages
+      if (error.name === 'TypeError' && error.message.includes('fetch')) {
+        setError('Unable to connect to server. Please check if the backend is running.');
+      } else if (error.message && (error.message.includes('401') || error.message.includes('Invalid'))) {
+        setError('Invalid email or password. Please try again.');
+      } else if (error.message) {
+        setError(error.message);
+      } else {
+        setError('Login failed. Please try again.');
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -138,7 +166,7 @@ const LoginPage = () => {
                 />
                 <span className="checkbox-text">Remember me</span>
               </label>
-              <a href="#" className="forgot-link">Forgot password?</a>
+              <button type="button" className="forgot-link">Forgot password?</button>
             </div>
             
             <button 
